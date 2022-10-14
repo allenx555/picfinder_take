@@ -17,12 +17,12 @@ try:
 except:
     import json
 
-from .config import SAUCENAO_RESULT_NUM, ASCII_RESULT_NUM, THUMB_ON, proxies, HOST_CUSTOM
+from .config import get_config
 
 logger = log.new_logger('image')
 
 async def get_pic(address):
-    return await (await aiorequests.get(address,timeout=20, proxies=proxies)).content
+    return await (await aiorequests.get(address,timeout=20, proxies=get_config('base', 'proxies'))).content
 
 def randcolor():
     return (randint(0, 255), randint(0, 255), randint(0, 255))
@@ -407,14 +407,14 @@ class SauceNAO():
         params['db'] = db
         params['numres'] = numres
         self.params = params
-        self.host = HOST_CUSTOM['SAUCENAO'] or 'https://saucenao.com'
+        self.host = get_config('base', 'HOST_CUSTOM')['SAUCENAO'] or 'https://saucenao.com'
         self.header = "————>saucenao<————"
 
 
     async def get_sauce(self, url):
         self.params['url'] = url
         logger.debug(f"Now starting get the SauceNAO data:{url}")
-        response = await aiorequests.get(f'{self.host}/search.php', params=self.params, timeout=15, proxies=proxies)
+        response = await aiorequests.get(f'{self.host}/search.php', params=self.params, timeout=15, proxies=get_config('base', 'proxies'))
         data = await response.json()
         
         return data
@@ -434,7 +434,7 @@ class SauceNAO():
                     similarity=0
                 simimax = float(similarity) if float(similarity)>simimax else simimax
                 thumbnail_url = sauce['header']['thumbnail']
-                if THUMB_ON:
+                if get_config('base', 'THUMB_ON'):
                     try:
                         thumbnail_image = str(MessageSegment.image(pic2b64(ats_pic(Image.open(BytesIO(await get_pic(thumbnail_url)))))))
                     except Exception as e:
@@ -462,7 +462,7 @@ class SauceNAO():
 class ascii2d():
     def __init__(self, num=2):
         self.num = num
-        self.host = HOST_CUSTOM['ASCII'] or "https://ascii2d.net"
+        self.host = get_config('base', 'HOST_CUSTOM')['ASCII'] or "https://ascii2d.net"
         self.header = "————>ascii2d<————"
         self.scraper = cloudscraper.create_scraper()
 
@@ -471,9 +471,9 @@ class ascii2d():
         if data is not None:
             html = data
         else:
-            # html_data = await aiorequests.get(url, timeout=15, proxies=proxies)
+            # html_data = await aiorequests.get(url, timeout=15, proxies=get_config('base', 'proxies'))
             # html = etree.HTML(await html_data.text)
-            html_data = await aiorequests.run_sync_func(self.scraper.get, url, timeout=30, proxies=proxies)
+            html_data = await aiorequests.run_sync_func(self.scraper.get, url, timeout=30, proxies=get_config('base', 'proxies'))
             html = etree.HTML(html_data.text)
 
         all_data = html.xpath('//div[@class="row item-box"]')
@@ -518,10 +518,10 @@ class ascii2d():
     async def add_repass(self, tag: str, data):
         po = "——{}——".format(tag)
         for line in data:
-            if THUMB_ON:
+            if get_config('base', 'THUMB_ON'):
                 try:
                     #thumbnail_image = str(MessageSegment.image(pic2b64(ats_pic(Image.open(BytesIO(await get_pic(line[2])))))))
-                    thumbnail_image = str(MessageSegment.image(pic2b64(ats_pic(Image.open(BytesIO(self.scraper.get(line[2],timeout=20, proxies=proxies).content))))))
+                    thumbnail_image = str(MessageSegment.image(pic2b64(ats_pic(Image.open(BytesIO(self.scraper.get(line[2],timeout=20, proxies=get_config('base', 'proxies')).content))))))
                 except Exception as e:
                     print(format_exc())
                     thumbnail_image = "[预览图下载失败]"
@@ -540,9 +540,9 @@ class ascii2d():
         logger.debug(f"Now starting get the {url_index}")
 
         try:
-            # html_index_data = await aiorequests.get(url_index, timeout=7, proxies=proxies)
+            # html_index_data = await aiorequests.get(url_index, timeout=7, proxies=get_config('base', 'proxies'))
             # html_index = etree.HTML(await html_index_data.text)
-            html_index_data = await aiorequests.run_sync_func(self.scraper.get, url_index, timeout=7, proxies=proxies)
+            html_index_data = await aiorequests.run_sync_func(self.scraper.get, url_index, timeout=7, proxies=get_config('base', 'proxies'))
             html_index = etree.HTML(html_index_data.text)
         except Exception as e:
             print(format_exc())
@@ -573,7 +573,7 @@ async def get_image_data_sauce(image_url: str, api_key: str):
         image_url = image_url[0]
 
     logger.info("Loading Image Search Container……")
-    NAO = SauceNAO(api_key, numres=SAUCENAO_RESULT_NUM)
+    NAO = SauceNAO(api_key, numres=get_config('base', 'SAUCENAO_RESULT_NUM'))
 
     logger.debug("Loading all view……")
     repass = ''
@@ -595,7 +595,7 @@ async def get_image_data_ascii(image_url: str):
         image_url = image_url[0]
 
     logger.info("Loading Image Search Container……")
-    ii2d = ascii2d(ASCII_RESULT_NUM)
+    ii2d = ascii2d(get_config('base', 'ASCII_RESULT_NUM'))
 
     logger.debug("Loading all view……")
     repass1 = ''

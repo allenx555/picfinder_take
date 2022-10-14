@@ -1,0 +1,25 @@
+{
+    "base": {
+        "threshold": 70,
+        "SAUCENAO_KEY": "",
+        "SAUCENAO_RESULT_NUM": 3,
+        "ASCII_RESULT_NUM": 3,
+        "SEARCH_TIMEOUT": 60,
+        "DAILY_LIMIT": 10,
+        "CHAIN_REPLY": true,
+        "THUMB_ON": true,
+        "CHECK": true,
+        "IGNORE_STAMP": true,
+        "HOST_CUSTOM": {
+            "SAUCENAO": "",
+            "ASCII": ""
+        },
+        "proxies": { 
+            "http":"",
+            "https":""
+        },
+        "enableguild": {
+        },
+        "helptext": "[@[昵称]+图片] 单张/多张搜图\n[@[昵称]搜图] 进入批量搜图模式\n[退出搜图] 退出批量搜图模式"
+    }
+}
